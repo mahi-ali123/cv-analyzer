@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CV Analyzer - Get Your Resume Scored</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#5B21B6",
+              secondary: "#2DD4BF",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+
+      @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+      }
+
+      @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+      }
+
+      @keyframes glow {
+          0%, 100% { box-shadow: 0 0 5px rgba(91, 33, 182, 0.3); }
+          50% { box-shadow: 0 0 20px rgba(91, 33, 182, 0.6); }
+      }
+
+      @keyframes shimmer {
+          0% { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
+      }
+
+      .shimmer {
+          background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+          background-size: 200% 100%;
+          animation: shimmer 2s infinite;
+      }
+
+      .animate-pulse { animation: pulse 2s infinite; }
+      .animate-float { animation: float 3s ease-in-out infinite; }
+      .animate-glow { animation: glow 2s infinite; }
+
+      .progress-ring {
+          transform: rotate(-90deg);
+      }
+
+      .progress-ring-circle {
+          stroke-dasharray: 283;
+          transition: stroke-dashoffset 0.5s ease;
+      }
+
+      .drop-zone {
+          border: 2px dashed #e2e8f0;
+          transition: all 0.3s ease;
+      }
+
+      .drop-zone:hover, .drop-zone.active {
+          border-color: #5B21B6;
+          background-color: rgba(91, 33, 182, 0.05);
+      }
+
+      input[type="range"] {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 6px;
+          background: #e2e8f0;
+          border-radius: 5px;
+          outline: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          background: #5B21B6;
+          border-radius: 50%;
+          cursor: pointer;
+          transition: all 0.2s ease;
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          background: #7C3AED;
+      }
+
+      input[type="checkbox"] {
+          display: none;
+      }
+
+      .custom-checkbox {
+          width: 20px;
+          height: 20px;
+          border: 2px solid #cbd5e1;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+      }
+
+      input[type="checkbox"]:checked + .custom-checkbox {
+          background-color: #5B21B6;
+          border-color: #5B21B6;
+      }
+
+      input[type="checkbox"]:checked + .custom-checkbox:after {
+          content: '';
+          width: 6px;
+          height: 10px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+          margin-bottom: 2px;
+      }
+
+      .switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
+      }
+
+      .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+      }
+
+      .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #e2e8f0;
+          transition: .4s;
+          border-radius: 24px;
+      }
+
+      .slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+      }
+
+      input:checked + .slider {
+          background-color: #5B21B6;
+      }
+
+      input:checked + .slider:before {
+          transform: translateX(20px);
+      }
+
+      .hero-bg {
+          background-image: url('https://readdy.ai/api/search-image?query=A%20modern%20workspace%20with%20a%20computer%20showing%20CV%20analysis%20software%2C%20with%20a%20sleek%2C%20minimalist%20design.%20The%20background%20has%20a%20gradient%20from%20deep%20purple%20to%20light%20purple%20on%20the%20right%20side%2C%20while%20the%20left%20side%20remains%20clean%20and%20white%20with%20subtle%20abstract%20shapes.%20The%20image%20should%20have%20a%20professional%20and%20tech-forward%20feel%2C%20with%20soft%20lighting%20and%20a%20clean%20aesthetic.&width=1280&height=720&seq=1&orientation=landscape');
+          background-size: cover;
+          background-position: center right;
+      }
+
+      .feature-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px -5px rgba(91, 33, 182, 0.1);
+      }
+
+      .metric-card {
+          transition: all 0.3s ease;
+      }
+
+      .metric-card:hover {
+          transform: scale(1.03);
+          box-shadow: 0 10px 25px -5px rgba(91, 33, 182, 0.15);
+      }
+    </style>
+  </head>
+  <body class="bg-white text-gray-800 min-h-screen">
+    <!-- Header -->
+    <header class="fixed w-full bg-white bg-opacity-95 shadow-sm z-50">
+      <div
+        class="container mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <a href="#" class="flex items-center space-x-2">
+          <div
+            class="w-10 h-10 flex items-center justify-center text-white bg-primary rounded-full"
+          >
+            <i class="ri-file-search-line ri-lg"></i>
+          </div>
+          <span class="text-2xl font-['Pacifico'] text-primary">CVscan</span>
+        </a>
+
+        <nav class="hidden md:flex items-center space-x-8">
+          <a
+            href="#features"
+            class="text-gray-600 hover:text-primary transition-colors"
+            >Features</a
+          >
+          <a
+            href="#how-it-works"
+            class="text-gray-600 hover:text-primary transition-colors"
+            >How It Works</a
+          >
+          <a
+            href="#pricing"
+            class="text-gray-600 hover:text-primary transition-colors"
+            >Pricing</a
+          >
+          <a
+            href="#faq"
+            class="text-gray-600 hover:text-primary transition-colors"
+            >FAQ</a
+          >
+        </nav>
+
+        <div class="flex items-center space-x-4">
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors"
+            >Sign In</a
+          >
+          <a
+            href="#"
+            class="bg-primary text-white px-5 py-2 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors"
+            >Get Started</a
+          >
+        </div>
+
+        <button class="md:hidden w-10 h-10 flex items-center justify-center">
+          <i class="ri-menu-line ri-lg"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-24 md:pt-32 hero-bg">
+      <div
+        class="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center"
+      >
+        <div class="w-full md:w-1/2 text-center md:text-left mb-12 md:mb-0">
+          <h1
+            class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
+          >
+            <span class="text-primary">CV Analysis</span> Made Simple
+          </h1>
+          <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-xl">
+            Upload your resume and get instant feedback, scores, and suggestions
+            to improve your chances of landing your dream job.
+          </p>
+          <div
+            class="flex flex-col sm:flex-row items-center justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
+          >
+            <a
+              href="#upload"
+              class="bg-primary text-white px-8 py-3 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors animate-pulse"
+            >
+              Analyze My CV
+            </a>
+            <a
+              href="#how-it-works"
+              class="border border-gray-300 text-gray-700 px-8 py-3 !rounded-button whitespace-nowrap hover:bg-gray-50 transition-colors"
+            >
+              Learn More
+            </a>
+          </div>
+        </div>
+
+        <div class="w-full md:w-1/2 flex justify-center">
+          <!-- This div is intentionally empty as the background image is set in the hero-bg class -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="py-16 md:py-24 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div
+          class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden"
+        >
+          <div class="p-8 md:p-12">
+            <h2 class="text-3xl font-bold text-center mb-8">Upload Your CV</h2>
+
+            <div
+              id="dropZone"
+              class="drop-zone rounded-lg p-8 mb-8 flex flex-col items-center justify-center cursor-pointer animate-glow"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center text-primary mb-4"
+              >
+                <i class="ri-upload-cloud-line ri-3x"></i>
+              </div>
+              <p class="text-lg text-gray-600 mb-2">Drag & drop your CV here</p>
+              <p class="text-sm text-gray-500 mb-6">or</p>
+              <label
+                for="fileInput"
+                class="bg-primary text-white px-6 py-3 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors cursor-pointer"
+              >
+                Browse Files
+              </label>
+              <input
+                type="file"
+                id="fileInput"
+                class="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              />
+              <p class="text-sm text-gray-500 mt-4">
+                Supported formats: PDF, DOCX, JPG, PNG
+              </p>
+            </div>
+
+            <div
+              class="flex flex-col md:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg"
+            >
+              <div class="flex items-center mb-4 md:mb-0">
+                <label class="switch mr-3">
+                  <input type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+                <span class="text-gray-700"
+                  >Enable AI-powered deep analysis</span
+                >
+              </div>
+
+              <button
+                id="analyzeBtn"
+                class="bg-primary text-white px-6 py-3 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors opacity-50 cursor-not-allowed"
+                disabled
+              >
+                Analyze Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section (Initially Hidden) -->
+    <section id="results" class="py-16 md:py-24 hidden">
+      <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto">
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-12">
+            <div class="p-8 md:p-12">
+              <div class="flex flex-col md:flex-row items-start">
+                <div
+                  class="w-full md:w-1/3 mb-8 md:mb-0 flex flex-col items-center"
+                >
+                  <h3 class="text-2xl font-bold mb-6 text-center">
+                    Overall Score
+                  </h3>
+                  <div class="relative w-48 h-48">
+                    <svg class="progress-ring" width="160" height="160">
+                      <circle
+                        class="progress-ring-circle"
+                        stroke="#e2e8f0"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="70"
+                        cx="80"
+                        cy="80"
+                      />
+                      <circle
+                        class="progress-ring-circle"
+                        stroke="#5B21B6"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="70"
+                        cx="80"
+                        cy="80"
+                        stroke-dashoffset="180"
+                      />
+                    </svg>
+                    <div
+                      class="absolute inset-0 flex items-center justify-center"
+                    >
+                      <span class="text-4xl font-bold text-primary">78</span>
+                    </div>
+                  </div>
+                  <p class="text-gray-600 mt-4 text-center">
+                    Your CV is
+                    <span class="font-semibold text-primary"
+                      >above average</span
+                    >
+                  </p>
+                </div>
+
+                <div class="w-full md:w-2/3 pl-0 md:pl-8">
+                  <h3 class="text-2xl font-bold mb-6">Key Insights</h3>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      class="metric-card bg-white border border-gray-200 rounded p-4 hover:border-primary"
+                    >
+                      <div class="flex items-center mb-2">
+                        <div
+                          class="w-8 h-8 flex items-center justify-center text-primary mr-2"
+                        >
+                          <i class="ri-layout-line ri-lg"></i>
+                        </div>
+                        <h4 class="font-semibold">Format & Structure</h4>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                          <div
+                            class="bg-primary h-2.5 rounded-full"
+                            style="width: 85%"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium">85%</span>
+                      </div>
+                    </div>
+
+                    <div
+                      class="metric-card bg-white border border-gray-200 rounded p-4 hover:border-primary"
+                    >
+                      <div class="flex items-center mb-2">
+                        <div
+                          class="w-8 h-8 flex items-center justify-center text-primary mr-2"
+                        >
+                          <i class="ri-file-text-line ri-lg"></i>
+                        </div>
+                        <h4 class="font-semibold">Content Quality</h4>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                          <div
+                            class="bg-primary h-2.5 rounded-full"
+                            style="width: 72%"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium">72%</span>
+                      </div>
+                    </div>
+
+                    <div
+                      class="metric-card bg-white border border-gray-200 rounded p-4 hover:border-primary"
+                    >
+                      <div class="flex items-center mb-2">
+                        <div
+                          class="w-8 h-8 flex items-center justify-center text-primary mr-2"
+                        >
+                          <i class="ri-award-line ri-lg"></i>
+                        </div>
+                        <h4 class="font-semibold">Skills Match</h4>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                          <div
+                            class="bg-primary h-2.5 rounded-full"
+                            style="width: 68%"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium">68%</span>
+                      </div>
+                    </div>
+
+                    <div
+                      class="metric-card bg-white border border-gray-200 rounded p-4 hover:border-primary"
+                    >
+                      <div class="flex items-center mb-2">
+                        <div
+                          class="w-8 h-8 flex items-center justify-center text-primary mr-2"
+                        >
+                          <i class="ri-eye-line ri-lg"></i>
+                        </div>
+                        <h4 class="font-semibold">ATS Compatibility</h4>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                          <div
+                            class="bg-primary h-2.5 rounded-full"
+                            style="width: 92%"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium">92%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-4">Skills Analysis</h3>
+                <div id="skillsChart" class="w-full h-64"></div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-4">Industry Comparison</h3>
+                <div id="industryChart" class="w-full h-64"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden mt-8">
+            <div class="p-8">
+              <h3 class="text-2xl font-bold mb-6">Improvement Suggestions</h3>
+
+              <div class="space-y-4">
+                <div
+                  class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <div class="flex items-start">
+                    <div
+                      class="w-8 h-8 flex items-center justify-center text-yellow-500 mr-3 mt-0.5"
+                    >
+                      <i class="ri-error-warning-line ri-lg"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-lg mb-1">
+                        Quantify Your Achievements
+                      </h4>
+                      <p class="text-gray-600">
+                        Add specific metrics and numbers to demonstrate the
+                        impact of your work. For example, "Increased sales by
+                        25%" rather than "Increased sales."
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <div class="flex items-start">
+                    <div
+                      class="w-8 h-8 flex items-center justify-center text-yellow-500 mr-3 mt-0.5"
+                    >
+                      <i class="ri-error-warning-line ri-lg"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-lg mb-1">
+                        Enhance Technical Skills Section
+                      </h4>
+                      <p class="text-gray-600">
+                        Your technical skills section could be more
+                        comprehensive. Consider adding proficiency levels and
+                        organizing skills by category.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors"
+                >
+                  <div class="flex items-start">
+                    <div
+                      class="w-8 h-8 flex items-center justify-center text-green-500 mr-3 mt-0.5"
+                    >
+                      <i class="ri-checkbox-circle-line ri-lg"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-lg mb-1">
+                        Strong Professional Summary
+                      </h4>
+                      <p class="text-gray-600">
+                        Your professional summary effectively highlights your
+                        experience and career goals. It creates a strong first
+                        impression.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 flex justify-center">
+                <a
+                  href="#"
+                  class="bg-primary text-white px-6 py-3 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors"
+                >
+                  Download Detailed Report
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 md:py-24">
+      <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Powerful CV Analysis Features
+          </h2>
+          <p class="text-lg text-gray-600">
+            Our AI-powered platform provides comprehensive resume analysis to
+            help you stand out in the job market.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-robot-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">AI-Powered Analysis</h3>
+            <p class="text-gray-600">
+              Our advanced AI analyzes your resume against industry standards
+              and job requirements to provide actionable insights.
+            </p>
+          </div>
+
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-search-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">ATS Compatibility Check</h3>
+            <p class="text-gray-600">
+              Ensure your resume passes through Applicant Tracking Systems with
+              our comprehensive compatibility analysis.
+            </p>
+          </div>
+
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-bar-chart-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Detailed Scoring</h3>
+            <p class="text-gray-600">
+              Get a comprehensive score breakdown across multiple categories to
+              understand your resume's strengths and weaknesses.
+            </p>
+          </div>
+
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-lightbulb-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Personalized Suggestions</h3>
+            <p class="text-gray-600">
+              Receive tailored recommendations to improve your resume based on
+              your industry, experience level, and career goals.
+            </p>
+          </div>
+
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-group-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Industry Benchmarking</h3>
+            <p class="text-gray-600">
+              Compare your resume against industry standards and see how you
+              stack up against other professionals in your field.
+            </p>
+          </div>
+
+          <div
+            class="feature-card bg-white rounded-xl shadow-md p-6 transition-all duration-300"
+          >
+            <div
+              class="w-14 h-14 flex items-center justify-center text-white bg-primary rounded-full mb-6"
+            >
+              <i class="ri-file-download-line ri-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Detailed Reports</h3>
+            <p class="text-gray-600">
+              Download comprehensive reports with actionable insights that you
+              can use to improve your resume and job prospects.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-16 md:py-24 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+          <p class="text-lg text-gray-600">
+            Get your resume analyzed in three simple steps
+          </p>
+        </div>
+
+        <div
+          class="flex flex-col md:flex-row items-center justify-center max-w-5xl mx-auto"
+        >
+          <div class="w-full md:w-1/3 text-center px-6 mb-12 md:mb-0">
+            <div
+              class="w-20 h-20 flex items-center justify-center text-white bg-primary rounded-full mx-auto mb-6 animate-float"
+            >
+              <i class="ri-upload-cloud-line ri-2x"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">1. Upload Your CV</h3>
+            <p class="text-gray-600">
+              Upload your resume in PDF, DOCX, or image format through our
+              secure platform.
+            </p>
+          </div>
+
+          <div
+            class="hidden md:block w-12 h-1 md:w-1 md:h-24 bg-gray-300 mx-6 my-4 md:my-0"
+          ></div>
+
+          <div class="w-full md:w-1/3 text-center px-6 mb-12 md:mb-0">
+            <div
+              class="w-20 h-20 flex items-center justify-center text-white bg-primary rounded-full mx-auto mb-6 animate-float"
+              style="animation-delay: 0.2s;"
+            >
+              <i class="ri-search-line ri-2x"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">2. AI Analysis</h3>
+            <p class="text-gray-600">
+              Our advanced AI analyzes your resume across multiple dimensions
+              and criteria.
+            </p>
+          </div>
+
+          <div
+            class="hidden md:block w-12 h-1 md:w-1 md:h-24 bg-gray-300 mx-6 my-4 md:my-0"
+          ></div>
+
+          <div class="w-full md:w-1/3 text-center px-6">
+            <div
+              class="w-20 h-20 flex items-center justify-center text-white bg-primary rounded-full mx-auto mb-6 animate-float"
+              style="animation-delay: 0.4s;"
+            >
+              <i class="ri-file-list-3-line ri-2x"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">3. Get Results</h3>
+            <p class="text-gray-600">
+              Receive detailed feedback, scores, and suggestions to improve your
+              resume.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-16 md:py-24">
+      <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Simple, Transparent Pricing
+          </h2>
+          <p class="text-lg text-gray-600">
+            Choose the plan that works best for you
+          </p>
+        </div>
+
+        <div
+          class="flex flex-col md:flex-row justify-center max-w-5xl mx-auto gap-8"
+        >
+          <div
+            class="w-full md:w-1/3 bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-lg"
+          >
+            <div class="p-6 border-b">
+              <h3 class="text-xl font-bold mb-2">Basic</h3>
+              <div class="flex items-end mb-4">
+                <span class="text-4xl font-bold">Free</span>
+              </div>
+              <p class="text-gray-600">Perfect for a quick resume check</p>
+            </div>
+            <div class="p-6">
+              <ul class="space-y-3">
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Basic CV analysis</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Overall score</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Limited suggestions</span>
+                </li>
+                <li class="flex items-center text-gray-400">
+                  <div class="w-5 h-5 flex items-center justify-center mr-3">
+                    <i class="ri-close-line"></i>
+                  </div>
+                  <span>ATS compatibility check</span>
+                </li>
+                <li class="flex items-center text-gray-400">
+                  <div class="w-5 h-5 flex items-center justify-center mr-3">
+                    <i class="ri-close-line"></i>
+                  </div>
+                  <span>Industry comparison</span>
+                </li>
+              </ul>
+              <a
+                href="#"
+                class="block text-center bg-gray-100 text-gray-800 mt-6 px-6 py-3 !rounded-button whitespace-nowrap hover:bg-gray-200 transition-colors"
+              >
+                Get Started
+              </a>
+            </div>
+          </div>
+
+          <div
+            class="w-full md:w-1/3 bg-white rounded-xl shadow-lg overflow-hidden border-2 border-primary transition-all duration-300 hover:shadow-xl scale-105"
+          >
+            <div
+              class="bg-primary text-white text-center py-2 text-sm font-semibold"
+            >
+              MOST POPULAR
+            </div>
+            <div class="p-6 border-b">
+              <h3 class="text-xl font-bold mb-2">Pro</h3>
+              <div class="flex items-end mb-4">
+                <span class="text-4xl font-bold">$19</span>
+                <span class="text-gray-600 ml-1">/month</span>
+              </div>
+              <p class="text-gray-600">
+                For job seekers who want detailed feedback
+              </p>
+            </div>
+            <div class="p-6">
+              <ul class="space-y-3">
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Advanced CV analysis</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Detailed scoring breakdown</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Comprehensive suggestions</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>ATS compatibility check</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Industry comparison</span>
+                </li>
+              </ul>
+              <a
+                href="#"
+                class="block text-center bg-primary text-white mt-6 px-6 py-3 !rounded-button whitespace-nowrap hover:bg-purple-700 transition-colors"
+              >
+                Get Started
+              </a>
+            </div>
+          </div>
+
+          <div
+            class="w-full md:w-1/3 bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-lg"
+          >
+            <div class="p-6 border-b">
+              <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+              <div class="flex items-end mb-4">
+                <span class="text-4xl font-bold">$49</span>
+                <span class="text-gray-600 ml-1">/month</span>
+              </div>
+              <p class="text-gray-600">For recruiters and HR professionals</p>
+            </div>
+            <div class="p-6">
+              <ul class="space-y-3">
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Everything in Pro</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Bulk CV analysis</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Job description matching</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>API access</span>
+                </li>
+                <li class="flex items-center">
+                  <div
+                    class="w-5 h-5 flex items-center justify-center text-green-500 mr-3"
+                  >
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <span>Priority support</span>
+                </li>
+              </ul>
+              <a
+                href="#"
+                class="block text-center bg-gray-100 text-gray-800 mt-6 px-6 py-3 !rounded-button whitespace-nowrap hover:bg-gray-200 transition-colors"
+              >
+                Contact Sales
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 md:py-24 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            What Our Users Say
+          </h2>
+          <p class="text-lg text-gray-600">
+            Thousands of job seekers have improved their resumes with our
+            platform
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div
+            class="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg"
+          >
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-6">
+              "After using CVscan, I completely revamped my resume based on
+              their suggestions. Within two weeks, I landed three interviews and
+              received a job offer!"
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"
+              >
+                <span class="font-semibold">JM</span>
+              </div>
+              <div>
+                <h4 class="font-semibold">James Mitchell</h4>
+                <p class="text-sm text-gray-500">Software Engineer</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg"
+          >
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-6">
+              "The ATS compatibility check was a game-changer. I had no idea my
+              resume wasn't being seen by recruiters because of formatting
+              issues. Problem solved!"
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"
+              >
+                <span class="font-semibold">SR</span>
+              </div>
+              <div>
+                <h4 class="font-semibold">Sarah Rodriguez</h4>
+                <p class="text-sm text-gray-500">Marketing Specialist</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg"
+          >
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-fill"></i>
+                <i class="ri-star-half-fill"></i>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-6">
+              "As a recruiter, I recommend CVscan to all job seekers. The
+              detailed analysis helps candidates create resumes that truly stand
+              out in the hiring process."
+            </p>
+            <div class="flex items-center">
+              <div
+                class="w-10 h-10 bg-purple-400 rounded-full flex items-center justify-center text-white mr-3"
+              >
+                <span class="font-semibold">DT</span>
+              </div>
+              <div>
+                <h4 class="font-semibold">David Thompson</h4>
+                <p class="text-sm text-gray-500">HR Director</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-16 md:py-24">
+      <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p class="text-lg text-gray-600">
+            Find answers to common questions about our CV analysis service
+          </p>
+        </div>
+
+        <div class="max-w-3xl mx-auto">
+          <div class="space-y-6">
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                class="flex items-center justify-between w-full p-5 text-left font-semibold focus:outline-none"
+              >
+                <span>How accurate is the CV analysis?</span>
+                <i class="ri-arrow-down-s-line ri-lg"></i>
+              </button>
+              <div class="p-5 border-t">
+                <p class="text-gray-600">
+                  Our CV analysis is powered by advanced AI that has been
+                  trained on millions of resumes and job descriptions. While no
+                  analysis is perfect, our system provides highly accurate
+                  insights based on industry standards, recruiter preferences,
+                  and ATS requirements.
+                </p>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                class="flex items-center justify-between w-full p-5 text-left font-semibold focus:outline-none"
+              >
+                <span>Is my data secure?</span>
+                <i class="ri-arrow-down-s-line ri-lg"></i>
+              </button>
+              <div class="p-5 border-t">
+                <p class="text-gray-600">
+                  Yes, we take data security very seriously. Your resume is
+                  encrypted during transmission and storage. We do not share
+                  your personal information with third parties, and you can
+                  request deletion of your data at any time.
+                </p>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                class="flex items-center justify-between w-full p-5 text-left font-semibold focus:outline-none"
+              >
+                <span>What file formats are supported?</span>
+                <i class="ri-arrow-down-s-line ri-lg"></i>
+              </button>
+              <div class="p-5 border-t">
+                <p class="text-gray-600">
+                  We support PDF, DOCX, DOC, JPG, and PNG file formats. For best
+                  results, we recommend using PDF format as it maintains
+                  formatting across different devices and platforms.
+                </p>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                class="flex items-center justify-between w-full p-5 text-left font-semibold focus:outline-none"
+              >
+                <span>Can I analyze multiple versions of my CV?</span>
+                <i class="ri-arrow-down-s-line ri-lg"></i>
+              </button>
+              <div class="p-5 border-t">
+                <p class="text-gray-600">
+                  Yes, with our Pro and Enterprise plans, you can analyze
+                  multiple versions of your CV to compare scores and determine
+                  which version is most effective for different job
+                  applications.
+                </p>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                class="flex items-center justify-between w-full p-5 text-left font-semibold focus:outline-none"
+              >
+                <span>How often should I update my CV analysis?</span>
+                <i class="ri-arrow-down-s-line ri-lg"></i>
+              </button>
+              <div class="p-5 border-t">
+                <p class="text-gray-600">
+                  We recommend analyzing your CV whenever you make significant
+                  updates or when applying for a new position. Industry
+                  standards and ATS systems evolve, so regular analysis ensures
+                  your resume remains competitive.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- CTA Section -->
+    <section class="py-16 md:py-24 bg-primary">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6 text-white">
+          Ready to Improve Your CV?
+        </h2>
+        <p class="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">
+          Get started today and increase your chances of landing your dream job.
+        </p>
+        <a
+          href="#upload"
+          class="bg-white text-primary px-8 py-4 !rounded-button whitespace-nowrap hover:bg-gray-100 transition-colors font-semibold text-lg inline-block"
+        >
+          Analyze My CV Now
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <a href="#" class="flex items-center space-x-2 mb-4">
+              <div
+                class="w-10 h-10 flex items-center justify-center bg-white text-primary rounded-full"
+              >
+                <i class="ri-file-search-line ri-lg"></i>
+              </div>
+              <span class="text-2xl font-['Pacifico'] text-white">CVscan</span>
+            </a>
+            <p class="text-gray-400">
+              Advanced CV analysis powered by AI to help you land your dream
+              job.
+            </p>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Product</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#features"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Features</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#pricing"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Pricing</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >API</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Integrations</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Resources</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Blog</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Guides</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Support</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#faq"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >FAQ</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold mb-4">Company</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Careers</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Terms of Service</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center"
+        >
+          <p class="text-gray-400 mb-4 md:mb-0">
+            © 2025 CVscan. All rights reserved.
+          </p>
+
+          <div class="flex space-x-6">
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <div class="w-8 h-8 flex items-center justify-center">
+                <i class="ri-twitter-x-line ri-lg"></i>
+              </div>
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <div class="w-8 h-8 flex items-center justify-center">
+                <i class="ri-linkedin-line ri-lg"></i>
+              </div>
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <div class="w-8 h-8 flex items-center justify-center">
+                <i class="ri-facebook-line ri-lg"></i>
+              </div>
+            </a>
+            <a
+              href="#"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <div class="w-8 h-8 flex items-center justify-center">
+                <i class="ri-instagram-line ri-lg"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // File Upload Functionality
+        const dropZone = document.getElementById("dropZone");
+        const fileInput = document.getElementById("fileInput");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        // Drag and drop events
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+          dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        ["dragenter", "dragover"].forEach((eventName) => {
+          dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ["dragleave", "drop"].forEach((eventName) => {
+          dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+          dropZone.classList.add("active");
+        }
+
+        function unhighlight() {
+          dropZone.classList.remove("active");
+        }
+
+        dropZone.addEventListener("drop", handleDrop, false);
+
+        function handleDrop(e) {
+          const dt = e.dataTransfer;
+          const files = dt.files;
+
+          if (files.length) {
+            fileInput.files = files;
+            handleFiles(files);
+          }
+        }
+
+        fileInput.addEventListener("change", function () {
+          handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+          if (files.length) {
+            // Enable analyze button
+            analyzeBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            analyzeBtn.disabled = false;
+
+            // Show file name
+            const fileName = files[0].name;
+            dropZone.querySelector("p:first-of-type").textContent =
+              `Selected: ${fileName}`;
+          }
+        }
+
+        // Analyze button click
+        analyzeBtn.addEventListener("click", function () {
+          // Hide upload section
+          document.getElementById("upload").classList.add("hidden");
+
+          // Show results section
+          document.getElementById("results").classList.remove("hidden");
+
+          // Initialize charts
+          initCharts();
+
+          // Scroll to results
+          document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+        });
+
+        // FAQ toggles
+        const faqButtons = document.querySelectorAll("#faq button");
+
+        faqButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const content = this.nextElementSibling;
+            const icon = this.querySelector("i");
+
+            // Toggle icon
+            if (icon.classList.contains("ri-arrow-down-s-line")) {
+              icon.classList.remove("ri-arrow-down-s-line");
+              icon.classList.add("ri-arrow-up-s-line");
+            } else {
+              icon.classList.remove("ri-arrow-up-s-line");
+              icon.classList.add("ri-arrow-down-s-line");
+            }
+
+            // Toggle content
+            if (content.style.maxHeight) {
+              content.style.maxHeight = null;
+            } else {
+              content.style.maxHeight = content.scrollHeight + "px";
+            }
+          });
+        });
+      });
+
+      // Initialize Charts
+      function initCharts() {
+        // Skills Chart
+        const skillsChart = echarts.init(document.getElementById("skillsChart"));
+        const skillsOption = {
+          animation: false,
+          tooltip: {
+            trigger: "axis",
+            axisPointer: {
+              type: "shadow",
+            },
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            textStyle: {
+              color: "#1f2937",
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            top: "3%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "value",
+            axisLine: {
+              show: false,
+            },
+            axisTick: {
+              show: false,
+            },
+            axisLabel: {
+              color: "#1f2937",
+            },
+            splitLine: {
+              lineStyle: {
+                color: "#f3f4f6",
+              },
+            },
+          },
+          yAxis: {
+            type: "category",
+            data: [
+              "Communication",
+              "Leadership",
+              "Technical",
+              "Problem Solving",
+              "Teamwork",
+            ],
+            axisLine: {
+              show: false,
+            },
+            axisTick: {
+              show: false,
+            },
+            axisLabel: {
+              color: "#1f2937",
+            },
+          },
+          series: [
+            {
+              name: "Your CV",
+              type: "bar",
+              data: [75, 62, 88, 79, 70],
+              itemStyle: {
+                color: "rgba(87, 181, 231, 1)",
+                borderRadius: 4,
+              },
+            },
+            {
+              name: "Industry Average",
+              type: "bar",
+              data: [68, 72, 75, 65, 80],
+              itemStyle: {
+                color: "rgba(141, 211, 199, 1)",
+                borderRadius: 4,
+              },
+            },
+          ],
+        };
+        skillsChart.setOption(skillsOption);
+
+        // Industry Chart
+        const industryChart = echarts.init(document.getElementById("industryChart"));
+        const industryOption = {
+          animation: false,
+          tooltip: {
+            trigger: "item",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            textStyle: {
+              color: "#1f2937",
+            },
+          },
+          legend: {
+            bottom: "0%",
+            left: "center",
+            textStyle: {
+              color: "#1f2937",
+            },
+          },
+          series: [
+            {
+              name: "Industry Comparison",
+              type: "pie",
+              radius: ["40%", "70%"],
+              center: ["50%", "45%"],
+              avoidLabelOverlap: false,
+              itemStyle: {
+                borderRadius: 8,
+                borderColor: "#fff",
+                borderWidth: 2,
+              },
+              label: {
+                show: false,
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: "14",
+                  fontWeight: "bold",
+                },
+              },
+              labelLine: {
+                show: false,
+              },
+              data: [
+                {
+                  value: 78,
+                  name: "Your Score",
+                  itemStyle: { color: "rgba(87, 181, 231, 1)" },
+                },
+                {
+                  value: 65,
+                  name: "Industry Average",
+                  itemStyle: { color: "rgba(141, 211, 199, 1)" },
+                },
+                {
+                  value: 85,
+                  name: "Top Performers",
+                  itemStyle: { color: "rgba(251, 191, 114, 1)" },
+                },
+              ],
+            },
+          ],
+        };
+        industryChart.setOption(industryOption);
+
+        // Handle window resize
+        window.addEventListener("resize", function () {
+          skillsChart.resize();
+          industryChart.resize();
+        });
+      }
+    </script>
+  </body>
+</html>
